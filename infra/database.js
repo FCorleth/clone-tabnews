@@ -1,6 +1,5 @@
 import { Client } from "pg";
 
-// TESTE
 async function getNewClient() {
   const client = new Client({
     host: process.env.POSTGRES_HOST,
