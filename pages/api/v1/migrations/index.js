@@ -4,6 +4,15 @@ import database from "infra/database";
 
 export default async function migrations(request, response) {
   const method = request.method;
+
+  const permittedMethod = ["GET", "POST"];
+
+  if (!permittedMethod.includes(method)) {
+    return response
+      .status(405)
+      .json({ message: "Method not exist for this endpoint" });
+  }
+
   const dbClient = await database.getNewClient();
 
   const defaultMigrationsOptions = {
@@ -14,14 +23,6 @@ export default async function migrations(request, response) {
     verbose: true,
     migrationsTable: "pgmigrations",
   };
-
-  const permittedMethod = ["GET", "POST"];
-
-  if (!permittedMethod.includes(method)) {
-    return response
-      .status(405)
-      .json({ message: "Method not exist for this endpoint" });
-  }
 
   try {
     if (method === permittedMethod[0]) {
