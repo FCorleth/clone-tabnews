@@ -13,24 +13,25 @@ export default async function migrations(request, response) {
       .json({ message: "Method not exist for this endpoint" });
   }
 
-  const dbClient = await database.getNewClient();
-
-  const defaultMigrationsOptions = {
-    dbClient: dbClient,
-    dir: join("infra", "migrations"),
-    direction: "up",
-    noLock: true,
-    verbose: true,
-    migrationsTable: "pgmigrations",
-  };
+  let dbClient;
 
   try {
+    dbClient = await database.getNewClient();
+
+    const defaultMigrationsOptions = {
+      dbClient: dbClient,
+      dir: join("infra", "migrations"),
+      direction: "up",
+      noLock: true,
+      verbose: true,
+      migrationsTable: "pgmigrations",
+    };
+
     if (method === permittedMethod[0]) {
       const pendingMigrations = await migrationRunner({
         ...defaultMigrationsOptions,
         dryRun: true,
       });
-      await dbClient.end();
       return response.status(200).json([pendingMigrations]);
     }
 
@@ -39,8 +40,6 @@ export default async function migrations(request, response) {
         ...defaultMigrationsOptions,
         dryRun: false,
       });
-
-      await dbClient.end();
 
       if (migratedMigrations.length > 0) {
         return response.status(201).json([migratedMigrations]);
@@ -51,5 +50,7 @@ export default async function migrations(request, response) {
   } catch (error) {
     console.log(error);
     response.status(500).json({ error: error.message });
+  } finally {
+    await dbClient.end();
   }
 }
