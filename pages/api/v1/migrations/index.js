@@ -15,8 +15,16 @@ export default async function migrations(request, response) {
     migrationsTable: "pgmigrations",
   };
 
+  const permittedMethod = ["GET", "POST"];
+
+  if (!permittedMethod.includes(method)) {
+    return response
+      .status(405)
+      .json({ message: "Method not exist for this endpoint" });
+  }
+
   try {
-    if (method === "GET") {
+    if (method === permittedMethod[0]) {
       const pendingMigrations = await migrationRunner({
         ...defaultMigrationsOptions,
         dryRun: true,
@@ -25,7 +33,7 @@ export default async function migrations(request, response) {
       return response.status(200).json([pendingMigrations]);
     }
 
-    if (method === "POST") {
+    if (method === permittedMethod[1]) {
       const migratedMigrations = await migrationRunner({
         ...defaultMigrationsOptions,
         dryRun: false,
