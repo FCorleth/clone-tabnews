@@ -25,7 +25,7 @@ async function query(queryObject) {
     console.error("Não foi possível executar a query", error);
     throw error;
   } finally {
-    await client.end();
+    await client?.end();
   }
 }
 
