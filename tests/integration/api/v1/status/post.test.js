@@ -5,7 +5,7 @@ beforeAll(async () => {
 });
 
 describe("POST to /api/v1/status by anonymous user", () => {
-  test("should retrieving current system status", async () => {
+  test("should return 405 for unsupported methods", async () => {
     const response = await fetch("http://localhost:3000/api/v1/status", {
       method: "POST",
     });
