@@ -42,16 +42,18 @@ async function getHandler(_, res) {
 async function postHandler(_, res) {
   const { defaultMigrationsOptions, dbClient } = await createDbClient();
 
-  const migratedMigrations = await migrationRunner({
-    ...defaultMigrationsOptions,
-    dryRun: false,
-  });
+  try {
+    const migratedMigrations = await migrationRunner({
+      ...defaultMigrationsOptions,
+      dryRun: false,
+    });
 
-  await dbClient?.end();
+    if (migratedMigrations.length > 0) {
+      return res.status(201).json([migratedMigrations]);
+    }
 
-  if (migratedMigrations.length > 0) {
-    return res.status(201).json([migratedMigrations]);
+    return res.status(200).json([migratedMigrations]);
+  } finally {
+    await dbClient?.end();
   }
-
-  return res.status(200).json([migratedMigrations]);
 }
