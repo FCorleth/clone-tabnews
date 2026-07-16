@@ -1,7 +1,7 @@
 import orchestrator from "../orchestrator";
 
 beforeAll(async () => {
-  await orchestrator.waitForAllServices;
+  await orchestrator.waitForAllServices();
 });
 
 describe("GET to /api/v1/status by anonymous user", () => {
