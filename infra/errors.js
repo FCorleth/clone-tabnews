@@ -38,7 +38,7 @@ export class MethodNotAllowedError extends Error {
 
 export class ServiceError extends Error {
   constructor({ cause, message }) {
-    super(message || "Serice unavailable", { cause });
+    super(message || "Service unavailable", { cause });
     this.name = "ServiceError";
     this.action = "Verify if the service is available";
     this.statusCode = 503;
