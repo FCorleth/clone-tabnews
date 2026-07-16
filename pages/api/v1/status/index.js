@@ -1,41 +1,39 @@
+import { createRouter } from "next-connect";
+
 import database from "infra/database.js";
+import controller from "infra/controller";
 
-import { InternalServerError } from "infra/errors";
+const router = createRouter();
 
-export default async function status(request, response) {
-  try {
-    const databaseName = process.env.POSTGRES_DB;
-    const updatedAt = new Date().toISOString();
+router.get(getHandler);
 
-    const versionQuery = await database.query("SHOW server_version;");
-    const version = versionQuery.rows[0].server_version;
+export default router.handler(controller.errorHandlers);
 
-    const maxConnectionsQuery = await database.query("SHOW max_connections;");
-    const maxConnections = maxConnectionsQuery.rows[0].max_connections;
+async function getHandler(req, res) {
+  const databaseName = process.env.POSTGRES_DB;
+  const updatedAt = new Date().toISOString();
 
-    const activeConnectionsQuery = await database.query({
-      text: "SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1;",
-      values: [databaseName],
-    });
+  const versionQuery = await database.query("SHOW server_version;");
+  const version = versionQuery.rows[0].server_version;
 
-    const activeConnections = activeConnectionsQuery?.rows[0].count;
+  const maxConnectionsQuery = await database.query("SHOW max_connections;");
+  const maxConnections = maxConnectionsQuery.rows[0].max_connections;
 
-    response.status(200).json({
-      updated_at: updatedAt,
-      dependencies: {
-        database: {
-          version: version,
-          max_connections: parseInt(maxConnections),
-          active_connections: activeConnections,
-        },
+  const activeConnectionsQuery = await database.query({
+    text: "SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1;",
+    values: [databaseName],
+  });
+
+  const activeConnections = activeConnectionsQuery?.rows[0].count;
+
+  res.status(200).json({
+    updated_at: updatedAt,
+    dependencies: {
+      database: {
+        version: version,
+        max_connections: parseInt(maxConnections),
+        active_connections: activeConnections,
       },
-    });
-  } catch (error) {
-    const publicErrorObject = new InternalServerError({
-      cause: error,
-    });
-
-    console.error(publicErrorObject);
-    response.status(500).json(publicErrorObject);
-  }
+    },
+  });
 }
