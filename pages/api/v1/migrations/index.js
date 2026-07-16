@@ -29,14 +29,16 @@ async function createDbClient() {
 async function getHandler(_, res) {
   const { defaultMigrationsOptions, dbClient } = await createDbClient();
 
-  const pendingMigrations = await migrationRunner({
-    ...defaultMigrationsOptions,
-    dryRun: true,
-  });
+  try {
+    const pendingMigrations = await migrationRunner({
+      ...defaultMigrationsOptions,
+      dryRun: true,
+    });
 
-  await dbClient?.end();
-
-  return res.status(200).json([pendingMigrations]);
+    return res.status(200).json([pendingMigrations]);
+  } finally {
+    await dbClient?.end();
+  }
 }
 
 async function postHandler(_, res) {
