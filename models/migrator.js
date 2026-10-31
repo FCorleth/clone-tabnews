@@ -12,8 +12,8 @@ async function createDbClient() {
     dir: join("infra", "migrations"),
     direction: "up",
     noLock: true,
-    verbose: true,
     migrationsTable: "pgmigrations",
+    log: () => {},
   };
 
   return { defaultMigrationsOptions, dbClient };
