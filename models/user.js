@@ -38,8 +38,29 @@ async function validateUniqueEmail(email) {
   }
 }
 
+async function validateUniqueUsername(username) {
+  const result = await database.query({
+    text: `SELECT
+            username
+          FROM
+            users
+          WHERE
+            LOWER(username) = LOWER($1)
+          ;`,
+    values: [username],
+  });
+
+  if (result.rowCount > 0) {
+    throw new ValidationError({
+      message: "Username informado já está sendo utilizado",
+      action: "Utilize outro username para realizar o cadastro",
+    });
+  }
+}
+
 async function create(userBody) {
   await validateUniqueEmail(userBody.email);
+  await validateUniqueUsername(userBody.username);
 
   const newUser = await runInsertQuery(userBody);
   return newUser;
