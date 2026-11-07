@@ -33,7 +33,7 @@ describe("GET to /api/v1/users/[username] by anonymous user", () => {
       id: resposne2Body.id,
       username: "MesmoCase",
       email: "mesmocase@gmail.com",
-      password: "fabio123",
+      password: resposne2Body.password,
       created_at: resposne2Body.created_at,
       updated_at: resposne2Body.updated_at,
     });
@@ -67,7 +67,7 @@ describe("GET to /api/v1/users/[username] by anonymous user", () => {
       id: resposne2Body.id,
       username: "CaseDiferente",
       email: "casediferente@gmail.com",
-      password: "fabio123",
+      password: resposne2Body.password,
       created_at: resposne2Body.created_at,
       updated_at: resposne2Body.updated_at,
     });
