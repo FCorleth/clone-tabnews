@@ -83,7 +83,6 @@ describe("PATCH to /api/v1/users/[username]", () => {
 
     const responseBody = await response.json();
 
-    console.log(responseBody);
     expect(responseBody).toEqual({
       id: responseBody.id,
       username: "nova_senha",
@@ -117,11 +116,9 @@ describe("PATCH to /api/v1/users/[username]", () => {
   test("Update 'username' with duplicated 'username'", async () => {
     await orchestrator.createUser({
       username: "username1",
-      email: "email1@email.com",
     });
     await orchestrator.createUser({
       username: "username2",
-      email: "email2@email.com",
     });
 
     const response = await orchestrator.updateUser("username2", {
@@ -142,15 +139,13 @@ describe("PATCH to /api/v1/users/[username]", () => {
 
   test("Update 'email' with duplicated 'email'", async () => {
     await orchestrator.createUser({
-      username: "email_existente",
       email: "email_existente@email.com",
     });
-    await orchestrator.createUser({
-      username: "email_existente2",
+    const secondUser = await orchestrator.createUser({
       email: "email_existente2@email.com",
     });
 
-    const response = await orchestrator.updateUser("email_existente2", {
+    const response = await orchestrator.updateUser(secondUser.username, {
       email: "email_existente@email.com",
     });
 
