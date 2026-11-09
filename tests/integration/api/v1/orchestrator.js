@@ -1,6 +1,9 @@
 import retry from "async-retry";
+import { faker } from "@faker-js/faker";
+
 import database from "infra/database";
 import migrator from "models/migrator";
+import user from "models/user";
 
 async function waitForAllServices() {
   await waitForWebServer();
@@ -25,20 +28,13 @@ async function runPendingMigrations() {
   await migrator.runPendingMigrations();
 }
 
-async function createUser(userData) {
-  const response = await fetch("http://localhost:3000/api/v1/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: userData.username,
-      email: userData.email,
-      password: userData.password || "senha123",
-    }),
+async function createUser(userObject) {
+  return await user.create({
+    username:
+      userObject.username || faker.internet.username().replace(/[_.-]/g, ""),
+    email: userObject.email || faker.internet.email(),
+    password: userObject.password || "senha_padrao_123",
   });
-
-  expect(response.status).toBe(201);
-
-  return response.json();
 }
 
 async function updateUser(username, userData) {
