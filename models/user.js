@@ -33,8 +33,8 @@ async function validateUniqueEmail(email) {
 
   if (result.rowCount > 0) {
     throw new ValidationError({
-      message: "Email informado já está sendo utilizado",
-      action: "Utilize outro email para realizar o cadastro",
+      message: "Email informado já está sendo utilizado.",
+      action: "Utilize outro email para esta operação.",
     });
   }
 }
@@ -53,8 +53,8 @@ async function validateUniqueUsername(username) {
 
   if (result.rowCount > 0) {
     throw new ValidationError({
-      message: "Username informado já está sendo utilizado",
-      action: "Utilize outro username para realizar o cadastro",
+      message: "Username informado já está sendo utilizado.",
+      action: "Utilize outro username para esta operação.",
     });
   }
 }
@@ -65,8 +65,8 @@ async function hashPasswordInObject(userBody) {
 }
 
 async function create(userBody) {
-  await validateUniqueEmail(userBody.email);
   await validateUniqueUsername(userBody.username);
+  await validateUniqueEmail(userBody.email);
   await hashPasswordInObject(userBody);
 
   const newUser = await runInsertQuery(userBody);
@@ -104,9 +104,56 @@ async function findOneByUsername(username) {
   return userFound;
 }
 
+async function updateUser(userInput) {
+  const result = await database.query({
+    text: `
+        UPDATE
+          users
+        SET
+          username = $1,
+          email = $2,
+          password = $3,
+          updated_at = timezone('utc', now())
+        WHERE  
+          id = $4
+        RETURNING
+          *
+        ;`,
+    values: [
+      userInput.username,
+      userInput.email,
+      userInput.password,
+      userInput.id,
+    ],
+  });
+
+  return result.rows[0];
+}
+
+async function update(username, userInput) {
+  const currentUser = await findOneByUsername(username);
+
+  if ("username" in userInput) {
+    await validateUniqueUsername(userInput.username);
+  }
+
+  if ("email" in userInput) {
+    await validateUniqueEmail(userInput.email);
+  }
+
+  if ("password" in userInput) {
+    await hashPasswordInObject(userInput);
+  }
+
+  const userWithNewValues = { ...currentUser, ...userInput };
+
+  return await updateUser(userWithNewValues);
+}
+
 const user = {
   create,
   findOneByUsername,
+  update,
 };
 
 export default user;
